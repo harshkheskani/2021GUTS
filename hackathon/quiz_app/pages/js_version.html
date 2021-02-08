@@ -1,0 +1,222 @@
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Kaushan+Script" rel="stylesheet">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<script>
+    $(function(){
+    var loading = $('#loadbar').hide();
+    $(document)
+    .ajaxStart(function () {
+        loading.show();
+    }).ajaxStop(function () {
+    	loading.hide();
+    });
+
+    var correct_answer = "{{ correct_answer }}";
+    var question = 0;        
+    $("label.btn").on('click',function () {
+        var choice = $(this).find('input:radio').val();
+    	$('#loadbar').show();
+    	$('#quiz').fadeOut();
+    	setTimeout(function(){
+           $( "#answer" ).html(  $(this).checking(choice, correct_answer) );
+            $('#quiz').show();
+            $('#loadbar').fadeOut();
+            $.get("{% url 'quiz-app:add-question' category.slug %}", function( data ) {
+                var new_question = JSON.parse(data);
+                console.log(new_question);
+                $("#question-text").html(new_question.question);
+                $("#choice1").html(new_question.answers[0]);
+                $("#choice2").html(new_question.answers[1]);
+                $("#choice3").html(new_question.answers[2]);
+                $("#choice4").html(new_question.answers[3]);
+                
+                correct_answer = new_question.correct;
+
+            })
+            //window.location.replace("/{{ category.slug }}/question");
+    	}, 1500);
+        
+    });
+
+
+    $ans = correct_answer;
+    $score = 0
+
+    $.fn.checking = function(ck, correct_answer) {
+        console.log("The correct answer is " + correct_answer);
+        console.log("The value of ck is: " + ck);
+        if (ck != correct_answer)
+            return 'INCORRECT';
+        else
+            return 'CORRECT';
+    };
+});
+
+
+function add1(total) {
+    total = total + 1;
+    document.getElementById("score") = "Score :" + total
+}
+
+function check(val) {
+    console.log(val)
+    var correct_answer = "{{ correct_answer }}";
+    console.log(correct_answer);
+
+}
+
+</script>
+<style>
+    body {
+        padding-top: 4.2rem;
+        padding-bottom: 4.2rem;
+        background: rgba(0, 0, 0, 0.76);
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+
+    h1,
+    h2,
+    h3 {
+        font-family: 'Kaushan Script', cursive;
+    }
+
+
+    .myform {
+        position: relative;
+        display: -ms-flexbox;
+        display: flex;
+        padding: 1rem;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        width: 100%;
+        pointer-events: auto;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid rgba(0, 0, 0, .2);
+        border-radius: 1.1rem;
+        outline: 0;
+        max-width: 500px;
+    }
+
+    .tx-tfm {
+        text-transform: uppercase;
+    }
+
+    .mybtn {
+        border-radius: 50px;
+    }
+
+    .login-or {
+        position: relative;
+        color: #aaa;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .span-or {
+        display: block;
+        position: absolute;
+        left: 50%;
+        top: -2px;
+        margin-left: -25px;
+        background-color: #fff;
+        width: 50px;
+        text-align: center;
+    }
+
+    .hr-or {
+        height: 1px;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .google {
+        color: #666;
+        width: 100%;
+        height: 40px;
+        text-align: center;
+        outline: none;
+        border: 1px solid lightgrey;
+    }
+
+    form .error {
+        color: #ff0000;
+    }
+
+    #second {
+        display: none;
+    }
+    label.btn:hover {
+    text-shadow: 0 3px 2px rgba(0,0,0,0.4);
+
+}
+    label.btn-block {
+    text-align: left;
+    position: relative
+}
+
+    label .btn-label {
+    position: relative;
+    left: 0;
+    top: 0;
+    display: inline-block;
+    padding: 0 10px;
+    background: rgba(0, 0, 0, 0.15);
+    height: 100%
+}
+.mybtn{
+    border-radius: 50px;
+    outline: auto;
+    background-color: beige;
+}
+</style>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-5 mx-auto">
+                <div id="first">
+                    <div class="myform form">
+                        <div class="logo mb-3">
+                            <div class="col-md-12 text-center">
+                                {% if category %}
+                                <h1>{{ category.name }}</h1>
+                                {% else %}
+                                <h1>Question</h1>
+                                {% endif %}
+                                {% if question %}
+                                <h5 id="question-text">{{question.question}}</h5>
+                                {% else %}
+                                <h5 id="question-text">No questions were found</h5>
+                                {% endif %}
+                            </div>
+                            {% if question %}
+                                <span class = "text-align:left" id="score">Score : 0</span>
+                                <div class="quiz" id="quiz" data-toggle="buttons">
+                                    {% for choice in choices %}
+                                        <label class="btn mybtn btn-block" id="choice{{ forloop.counter }}"><input type="radio" name="q_answer" value="{{ choice }}" id="radio{{ forloop.counter }}" onclick="check(value)">{{ choice }}</label>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        <div class="modal-footer text-muted">
+                            <span id="answer"></span>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
